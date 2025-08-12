@@ -24,6 +24,10 @@ type Database struct {
 	SQLite           bool   `yaml:"sqlite"`
 	DatabaseFilename string `yaml:"database_filename"`
 }
+type GoDatabase struct {
+	duckdb           bool   `yaml:"duckdb"`
+	DatabaseFilename string `yaml:"database_filename"`
+}
 
 // CSV represents the CSV configuration
 type CSV struct {
@@ -32,8 +36,9 @@ type CSV struct {
 
 // FilePaths represents the file paths configuration
 type FilePaths struct {
-	MusicLibraryPath string `yaml:"music_library_path"`
-	CodeRepoLocation string `yaml:"code_repo_location"`
+	MusicLibraryPath   string `yaml:"music_library_path"`
+	CodeRepoLocation   string `yaml:"code_repo_location"`
+	GoCodeRepoLocation string `yaml:"go_code_repo_location"`
 }
 
 // Skill represents a skill entry
