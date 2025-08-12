@@ -1,11 +1,10 @@
-package GoMusicLibraryGUIApp
+package main
 
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
-	"testing"
 )
 
 // Config represents the structure of config.yml
@@ -44,7 +43,7 @@ type Skill struct {
 }
 
 // TestYAMLParsing tests loading and parsing the config.yml file
-func TestYAMLParsing(t *testing.T) {
+func TestYAMLParsing() {
 	// Read the YAML file
 	data, err := ioutil.ReadFile("config.yml")
 	if err != nil {
@@ -73,4 +72,11 @@ func TestYAMLParsing(t *testing.T) {
 	for i, skill := range config.Skills {
 		fmt.Printf("  %d. %s: %s\n", i+1, skill.Name, skill.Description)
 	}
+}
+
+// Main function to run the YAML test
+func main() {
+	fmt.Println("Testing YAML configuration parsing...")
+	TestYAMLParsing()
+	fmt.Println("\nYAML parsing test completed successfully!")
 }
