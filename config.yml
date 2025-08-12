@@ -10,10 +10,14 @@ Database:
 CSV:
   csv_filename: csv_output_full.csv
 
+GoDatabase:
+  duckdb: true
+  go_database_filename: musiclibrary.duckdb
+
 FilePaths:
   music_library_path: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\49ersMusicLibrary
-  code_repo_location: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\FortyNinersMusicLibraryApp
-  go_code_repo_locaton: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp
+  python_code_repo_location: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\FortyNinersMusicLibraryApp
+  go_code_repo_location: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp
 
 Skills:
   - name: Python
@@ -24,9 +28,9 @@ Skills:
     description: The database type to keep information
   - name: sqlite
     description: Using SQLite at this time, may switch to DuckDB later in the life of the project
-  - name: Go or golang
+  - name: Go
     description: The Go programming language
   - name: fyne.io
-    description: The GUI Library used in golang
+    description: The GUI Library used in Go
   - name: duckdb
-    description: The database to be used in golang
+    description: The database to be used in Go
