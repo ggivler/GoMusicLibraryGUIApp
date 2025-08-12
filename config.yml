@@ -1,0 +1,25 @@
+SoftwareAuthor: "Gregory P Givler"
+SoftwareCompany: "Rachel Software"
+Phone: 6102129492
+Website: wiki.ggivler.com
+
+Database:
+  sqlite: true
+  database_filename: musiclibrary.db
+
+CSV:
+  csv_filename: csv_output_full.csv
+
+FilePaths:
+  music_library_path: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\49ersMusicLibrary
+  code_repo_location: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\FortyNinersMusicLibraryApp
+
+Skills:
+  - name: Python
+    description: The primary programming language
+  - name: PySide6
+    description: The GUI Library used
+  - name: SQL
+    description: The database type to keep information
+  - name: sqlite
+    description: Using SQLite at this time, may switch to DuckDB later in the life of the project
