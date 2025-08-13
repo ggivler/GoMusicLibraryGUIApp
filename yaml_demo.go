@@ -9,20 +9,25 @@ import (
 
 // Config represents the structure of config.yml
 type Config struct {
-	SoftwareAuthor  string    `yaml:"SoftwareAuthor"`
-	SoftwareCompany string    `yaml:"SoftwareCompany"`
-	Phone           int       `yaml:"Phone"`
-	Website         string    `yaml:"Website"`
-	Database        Database  `yaml:"Database"`
-	CSV             CSV       `yaml:"CSV"`
-	FilePaths       FilePaths `yaml:"FilePaths"`
-	Skills          []Skill   `yaml:"Skills"`
+	SoftwareAuthor  string     `yaml:"SoftwareAuthor"`
+	SoftwareCompany string     `yaml:"SoftwareCompany"`
+	Phone           int        `yaml:"Phone"`
+	Website         string     `yaml:"Website"`
+	Database        Database   `yaml:"Database"`
+	GoDatabase      GoDatabase `yaml:"GoDatabase"`
+	CSV             CSV        `yaml:"CSV"`
+	FilePaths       FilePaths  `yaml:"FilePaths"`
+	Skills          []Skill    `yaml:"Skills"`
 }
 
 // Database represents the database configuration
 type Database struct {
 	SQLite           bool   `yaml:"sqlite"`
 	DatabaseFilename string `yaml:"database_filename"`
+}
+type GoDatabase struct {
+	DuckDB           bool   `yaml:"duckdb"`
+	DatabaseFilename string `yaml:"go_database_filename"`
 }
 
 // CSV represents the CSV configuration
@@ -32,8 +37,9 @@ type CSV struct {
 
 // FilePaths represents the file paths configuration
 type FilePaths struct {
-	MusicLibraryPath string `yaml:"music_library_path"`
-	CodeRepoLocation string `yaml:"code_repo_location"`
+	MusicLibraryPath       string `yaml:"music_library_path"`
+	PythonCodeRepoLocation string `yaml:"python_code_repo_location"`
+	GoCodeRepoLocation     string `yaml:"go_code_repo_location"`
 }
 
 // Skill represents a skill entry
@@ -43,7 +49,7 @@ type Skill struct {
 }
 
 // TestYAMLParsing tests loading and parsing the config.yml file
-func TestYAMLParsing() {
+func TestYAMLParsing() Config {
 	// Read the YAML file
 	data, err := ioutil.ReadFile("config.yml")
 	if err != nil {
@@ -64,19 +70,25 @@ func TestYAMLParsing() {
 	fmt.Printf("Website: %s\n", config.Website)
 	fmt.Printf("Database SQLite: %t\n", config.Database.SQLite)
 	fmt.Printf("Database Filename: %s\n", config.Database.DatabaseFilename)
+	fmt.Printf("GoDatabase DuckDB: %t\n", config.GoDatabase.DuckDB)
+	fmt.Printf("GoDatabase Filename: %s\n", config.GoDatabase.DatabaseFilename)
 	fmt.Printf("CSV Filename: %s\n", config.CSV.CSVFilename)
 	fmt.Printf("Music Library Path: %s\n", config.FilePaths.MusicLibraryPath)
-	fmt.Printf("Code Repo Location: %s\n", config.FilePaths.CodeRepoLocation)
+	fmt.Printf("Code Repo Location: %s\n", config.FilePaths.PythonCodeRepoLocation)
+	fmt.Printf("Go Code Repo Location: %s\n", config.FilePaths.GoCodeRepoLocation)
 
 	fmt.Println("\nSkills:")
 	for i, skill := range config.Skills {
 		fmt.Printf("  %d. %s: %s\n", i+1, skill.Name, skill.Description)
 	}
+	return config
 }
 
 // Main function to run the YAML test
 func main() {
 	fmt.Println("Testing YAML configuration parsing...")
-	TestYAMLParsing()
+	var conf Config
+	conf = TestYAMLParsing()
 	fmt.Println("\nYAML parsing test completed successfully!")
+	fmt.Printf("Music Library Path: %s\n", conf.FilePaths.MusicLibraryPath)
 }
