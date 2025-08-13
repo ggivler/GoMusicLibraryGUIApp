@@ -91,5 +91,4 @@ func main() {
 	conf = TestYAMLParsing()
 	fmt.Println("\nYAML parsing test completed successfully!")
 	fmt.Printf("Music Library Path: %s\n", conf.FilePaths.MusicLibraryPath)
-	
 }
