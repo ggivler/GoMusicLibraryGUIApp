@@ -84,6 +84,19 @@ func TestYAMLParsing() Config {
 	return config
 }
 
+// Writing the config file after editing the config object
+func writeConfig(config Config, filename string) Config {
+	data, err := yaml.Marshal(&config)
+	if err != nil {
+		log.Fatalf("Error marshalling config: %v", err)
+	}
+	err = ioutil.WriteFile(filename, data, 0666)
+	if err != nil {
+		log.Fatalf("Error writing config.yml: %v", err)
+	}
+	return config
+}
+
 // Main function to run the YAML test
 func main() {
 	fmt.Println("Testing YAML configuration parsing...")
@@ -91,4 +104,8 @@ func main() {
 	conf = TestYAMLParsing()
 	fmt.Println("\nYAML parsing test completed successfully!")
 	fmt.Printf("Music Library Path: %s\n", conf.FilePaths.MusicLibraryPath)
+	newMusicLibraryPath := "C:\\Users\\ggivl\\Documents\\PythonDevelopment\\FortyNinersDevelopment\\49ers-musiclibrary"
+	conf.FilePaths.MusicLibraryPath = newMusicLibraryPath
+	new_conf := writeConfig(conf, "new_config.yml")
+	fmt.Printf("New Music Library Path %s\n", new_conf.FilePaths.MusicLibraryPath)
 }
