@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 )
 
 // Config represents the structure of config.yml
@@ -84,6 +88,85 @@ func TestYAMLParsing() Config {
 	return config
 }
 
+// Writing the config file after editing the config object
+func writeConfig(config Config, filename string) Config {
+	data, err := yaml.Marshal(&config)
+	if err != nil {
+		log.Fatalf("Error marshalling config: %v", err)
+	}
+	err = ioutil.WriteFile(filename, data, 0666)
+	if err != nil {
+		log.Fatalf("Error writing config.yml: %v", err)
+	}
+	return config
+}
+
+func readCSV(filename string) [][]string {
+	file, err := os.Open(filename)
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		log.Fatalf("Error opening file: %v\n", err)
+		return nil
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		fmt.Printf("Error reading file: %v\n", err)
+		log.Fatalf("Error reading file: %v\n", err)
+		return nil
+	}
+
+	fmt.Printf("Read %d records\n", len(records))
+	for i, record := range records {
+		fmt.Printf("Record %d: %v\n", i+1, record)
+		// Also show as comma-separated values:
+		fmt.Printf("  CSV format: %s\n", strings.Join(record, ","))
+
+	}
+
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		fmt.Printf("Error seeking file: %v\n", err)
+		log.Fatalf("Error seeking file: %v\n", err)
+		return nil
+	}
+
+	reader = csv.NewReader(file)
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Printf("Error reading file: %v\n", err)
+			log.Fatalf("Error reading file: %v\n", err)
+			return nil
+		}
+		fmt.Println(strings.Join(record, ","))
+	}
+	return records
+}
+
+func writeCSV(filename string, records [][]string) {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+	}
+	defer file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	err = writer.WriteAll(records)
+	if err != nil {
+		fmt.Printf("Error writing file: %v\n", err)
+	}
+	log.Printf("Wrote %d records to the file %s\n", len(records), filename)
+}
+
 // Main function to run the YAML test
 func main() {
 	fmt.Println("Testing YAML configuration parsing...")
@@ -91,4 +174,11 @@ func main() {
 	conf = TestYAMLParsing()
 	fmt.Println("\nYAML parsing test completed successfully!")
 	fmt.Printf("Music Library Path: %s\n", conf.FilePaths.MusicLibraryPath)
+	newMusicLibraryPath := "C:\\Users\\ggivl\\Documents\\PythonDevelopment\\FortyNinersDevelopment\\49ers-musiclibrary"
+	conf.FilePaths.MusicLibraryPath = newMusicLibraryPath
+	new_conf := writeConfig(conf, "new_config.yml")
+	fmt.Printf("New Music Library Path %s\n", new_conf.FilePaths.MusicLibraryPath)
+	records := readCSV("csv_output_full.csv")
+	fmt.Printf("Found %d Records in CSV file %s\n", len(records), "csv_output_full.csv")
+	writeCSV("new_csv_output_full.csv", records)
 }

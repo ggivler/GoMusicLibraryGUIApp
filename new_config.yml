@@ -1,0 +1,31 @@
+SoftwareAuthor: Gregory P Givler
+SoftwareCompany: Rachel Software
+Phone: 6102129492
+Website: wiki.ggivler.com
+Database:
+    sqlite: true
+    database_filename: musiclibrary.db
+GoDatabase:
+    duckdb: true
+    go_database_filename: musiclibrary.duckdb
+CSV:
+    csv_filename: csv_output_full.csv
+FilePaths:
+    music_library_path: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\49ers-musiclibrary
+    python_code_repo_location: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\FortyNinersMusicLibraryApp
+    go_code_repo_location: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp
+Skills:
+    - name: Python
+      description: The primary programming language
+    - name: PySide6
+      description: The GUI Library used with Python
+    - name: SQL
+      description: The database type to keep information
+    - name: sqlite
+      description: Using SQLite at this time, may switch to DuckDB later in the life of the project
+    - name: Go
+      description: The Go programming language
+    - name: fyne.io
+      description: The GUI Library used in Go
+    - name: duckdb
+      description: The database to be used in Go
