@@ -49,7 +49,7 @@ type Skill struct {
 }
 
 // TestYAMLParsing tests loading and parsing the config.yml file
-func TestYAMLParsing() {
+func TestYAMLParsing() Config {
 	// Read the YAML file
 	data, err := ioutil.ReadFile("config.yml")
 	if err != nil {
@@ -81,11 +81,15 @@ func TestYAMLParsing() {
 	for i, skill := range config.Skills {
 		fmt.Printf("  %d. %s: %s\n", i+1, skill.Name, skill.Description)
 	}
+	return config
 }
 
 // Main function to run the YAML test
 func main() {
 	fmt.Println("Testing YAML configuration parsing...")
-	TestYAMLParsing()
+	var conf Config
+	conf = TestYAMLParsing()
 	fmt.Println("\nYAML parsing test completed successfully!")
+	fmt.Printf("Music Library Path: %s\n", conf.FilePaths.MusicLibraryPath)
+	
 }
