@@ -12,7 +12,7 @@ CSV:
 
 GoDatabase:
   duckdb: true
-  go_database_filename: musiclibrary.duckdb
+  go_database_filename: musiclibrary.duck_db
 
 FilePaths:
   music_library_path: C:\Users\ggivl\Documents\PythonDevelopment\FortyNinersDevelopment\49ersMusicLibrary
