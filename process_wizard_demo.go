@@ -1,23 +1,117 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 )
 
+// getSafeStartLocation returns a safe starting location for file dialogs
+func getSafeStartLocation() fyne.ListableURI {
+	// Helper function to safely create and test a listable URI
+	createListableURI := func(path string) fyne.ListableURI {
+		if _, err := os.Stat(path); err != nil {
+			return nil
+		}
+		uri := storage.NewFileURI(path)
+		if uri == nil {
+			return nil
+		}
+		if listableURI, ok := uri.(fyne.ListableURI); ok {
+			// Test if we can actually list the directory
+			if _, err := listableURI.List(); err == nil {
+				return listableURI
+			}
+		}
+		return nil
+	}
+
+	// Try C:\ root directory first (always accessible on Windows)
+	if rootURI := createListableURI("C:\\"); rootURI != nil {
+		return rootURI
+	}
+
+	// Try Documents directory
+	if userProfile := os.Getenv("USERPROFILE"); userProfile != "" {
+		documentsDir := userProfile + "\\Documents"
+		if docsURI := createListableURI(documentsDir); docsURI != nil {
+			return docsURI
+		}
+	}
+
+	// Fallback to home directory
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		if homeURI := createListableURI(homeDir); homeURI != nil {
+			return homeURI
+		}
+	}
+
+	// Final fallback to current directory
+	if currentDir, err := os.Getwd(); err == nil {
+		if currentURI := createListableURI(currentDir); currentURI != nil {
+			return currentURI
+		}
+	}
+
+	return nil
+}
+
+func showFolderPicker(parentWindow fyne.Window) {
+	folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+		if err != nil {
+			// Handle the error (e.g., show an error dialog)
+			dialog.ShowError(err, parentWindow)
+			return
+		}
+		if uri == nil {
+			// User cancelled the dialog
+			return
+		}
+		// Process the selected folder URI (e.g., display its path)
+		fmt.Printf("Selected folder: %s\n", uri.Path())
+		// Save uri.Path() to the config yaml file
+		// Need a function here.
+
+	}, parentWindow)
+
+	// Set a safe starting location only if we can get one
+	if startLocation := getSafeStartLocation(); startLocation != nil {
+		folderDialog.SetLocation(startLocation)
+	}
+
+	// Configure dialog to avoid problematic favorite locations
+	// This helps prevent the "uri is not listable" error
+	folderDialog.Resize(fyne.NewSize(800, 600))
+
+	folderDialog.Show()
+}
+
 func main() {
-	a := app.New()
+	// Note: The "Getting favorite locations - Cause: uri is not listable" warning
+	// is a known Fyne issue on Windows where the file dialog tries to access
+	// system favorite locations that may not be accessible. This doesn't affect
+	// functionality and can be safely ignored.
+
+	// Create app with unique ID to fix "Preferences API requires a unique ID" error
+	a := app.NewWithID("com.gomusiclibrary.wizardapp")
 	w := a.NewWindow("Wizard Dialog Example")
-	w.Resize(fyne.NewSize(400, 300))
+	w.Resize(fyne.NewSize(600, 400))
 
 	// Step 1 content
 	step1Content := container.NewVBox(
 		widget.NewLabel("Welcome to the Wizard!"),
-		widget.NewLabel("This is the first step."),
+		widget.NewLabel("Select the Music Library Folder to process"),
+		widget.NewButton("Select the Music Library Folder", func() {
+			fmt.Println("Enter Select the Music Library Folder to process")
+			showFolderPicker(w)
+		}),
 		widget.NewEntry(), // Example input
 	)
 
