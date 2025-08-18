@@ -43,7 +43,7 @@ func getSafeStartLocation() fyne.ListableURI {
 			}
 		}
 	}
-	
+
 	// Fallback to home directory
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
@@ -53,7 +53,7 @@ func getSafeStartLocation() fyne.ListableURI {
 			}
 		}
 	}
-	
+
 	// Final fallback to current directory
 	currentDir, _ := os.Getwd()
 	if uri := storage.NewFileURI(currentDir); uri != nil {
@@ -61,7 +61,7 @@ func getSafeStartLocation() fyne.ListableURI {
 			return listableURI
 		}
 	}
-	
+
 	return nil
 }
 
@@ -79,12 +79,12 @@ func showFolderPicker(parentWindow fyne.Window) {
 		// Process the selected folder URI (e.g., display its path)
 		fmt.Printf("Selected folder: %s\n", uri.Path())
 	}, parentWindow)
-	
+
 	// Set a safe starting location
 	if startLocation := getSafeStartLocation(); startLocation != nil {
 		folderDialog.SetLocation(startLocation)
 	}
-	
+
 	folderDialog.Show()
 }
 
@@ -94,10 +94,10 @@ func main() {
 		original: os.Stderr,
 	}
 	log.SetOutput(customWriter)
-	
+
 	// Set environment variable to potentially reduce favorite location issues
 	os.Setenv("FYNE_THEME", "light")
-	
+
 	myApp := app.NewWithID("GoMusicLibraryGUI")
 	w := myApp.NewWindow("GoMusicLibrary")
 
@@ -117,13 +117,17 @@ func main() {
 				fmt.Println("Opened file:", reader.URI().Name())
 			}
 		}, w)
-		
+
 		// Set a safe starting location
 		if startLocation := getSafeStartLocation(); startLocation != nil {
 			fileDialog.SetLocation(startLocation)
 		}
-		
+
 		fileDialog.Show()
+	})
+	processItem := fyne.NewMenuItem("Process Library Folder", func() {
+		fmt.Println("Process Library Folder selected")
+		showFolderPicker(w)
 	})
 	saveItem := fyne.NewMenuItem("Save", func() {
 		fmt.Println("Save file selected")
@@ -135,12 +139,12 @@ func main() {
 				fmt.Println("Saving to:", writer.URI().Name())
 			}
 		}, w)
-		
+
 		// Set a safe starting location
 		if startLocation := getSafeStartLocation(); startLocation != nil {
 			saveDialog.SetLocation(startLocation)
 		}
-		
+
 		saveDialog.Show()
 	})
 	exitItem := fyne.NewMenuItem("Exit", func() {
@@ -149,7 +153,7 @@ func main() {
 	})
 
 	// Create the File menu
-	fileMenu := fyne.NewMenu("File", newItem, openItem, saveItem, fyne.NewMenuItemSeparator(), exitItem)
+	fileMenu := fyne.NewMenu("File", newItem, processItem, openItem, saveItem, fyne.NewMenuItemSeparator(), exitItem)
 
 	// Create the main menu
 	mainMenu := fyne.NewMainMenu(fileMenu)
