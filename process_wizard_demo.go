@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -11,6 +9,9 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
+	"log"
+	"os"
+	"strings"
 )
 
 // getSafeStartLocation returns a safe starting location for file dialogs
@@ -63,56 +64,170 @@ func getSafeStartLocation() fyne.ListableURI {
 	return nil
 }
 
-func showFolderPicker(parentWindow fyne.Window) {
-	folderDialog := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
-		if err != nil {
-			// Handle the error (e.g., show an error dialog)
-			dialog.ShowError(err, parentWindow)
-			return
-		}
-		if uri == nil {
-			// User cancelled the dialog
-			return
-		}
-		// Process the selected folder URI (e.g., display its path)
-		fmt.Printf("Selected folder: %s\n", uri.Path())
-		// Save uri.Path() to the config yaml file
-		// Need a function here.
-
-	}, parentWindow)
-
-	// Set a safe starting location only if we can get one
-	if startLocation := getSafeStartLocation(); startLocation != nil {
-		folderDialog.SetLocation(startLocation)
+// suppressStderr temporarily redirects stderr to suppress Fyne's internal error logging
+// This uses os.File operations which are cross-platform compatible
+func suppressStderr(fn func()) {
+	// Create a null device to redirect stderr to (platform-specific)
+	nullDevice := "/dev/null"
+	if os.Getenv("OS") == "Windows_NT" || os.Getenv("GOOS") == "windows" {
+		nullDevice = "NUL"
 	}
+	
+	nullFile, err := os.OpenFile(nullDevice, os.O_WRONLY, 0)
+	if err != nil {
+		// If we can't open null device, try temp file approach
+		tempFile, err := os.CreateTemp("", "stderr_suppress")
+		if err != nil {
+			// If we can't create temp file, just run the function normally
+			fn()
+			return
+		}
+		defer os.Remove(tempFile.Name())
+		nullFile = tempFile
+	}
+	defer nullFile.Close()
+	
+	// Save original stderr
+	originalStderr := os.Stderr
+	
+	// Redirect stderr to null device
+	os.Stderr = nullFile
+	
+	// Run the function with stderr suppressed
+	fn()
+	
+	// Restore original stderr
+	os.Stderr = originalStderr
+}
 
-	// Configure dialog to avoid problematic favorite locations
-	// This helps prevent the "uri is not listable" error
-	folderDialog.Resize(fyne.NewSize(800, 600))
+func showFolderPicker(parentWindow fyne.Window, inputWidget *widget.Entry) {
+	var folderDialog *dialog.FileDialog
+	
+	// Suppress stderr during dialog creation to eliminate Fyne error messages
+	suppressStderr(func() {
+		// Create folder dialog with callback
+		folderDialog = dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
+			if err != nil {
+				// Handle the error (e.g., show an error dialog)
+				log.Printf("Folder selection error: %v", err)
+				dialog.ShowError(err, parentWindow)
+				return
+			}
+			if uri == nil {
+				// User cancelled the dialog
+				log.Println("Folder selection cancelled")
+				return
+			}
+			// Process the selected folder URI
+			selectedPath := uri.Path()
+			log.Println(selectedPath)
+			fmt.Printf("Selected folder: %s\n", selectedPath)
+			
+			// Set the selected folder path in the input widget
+			if inputWidget != nil {
+				inputWidget.SetText(selectedPath)
+			}
+			
+			// TODO: Save selectedPath to the config yaml file
+			// Need a function here.
 
+		}, parentWindow)
+		
+		// Configure dialog settings
+		folderDialog.Resize(fyne.NewSize(800, 600))
+		
+		// Set a safe starting location - this helps minimize the favorites issue
+		if startLocation := getSafeStartLocation(); startLocation != nil {
+			folderDialog.SetLocation(startLocation)
+		} else {
+			// Fallback to a known safe location
+			if userProfile := os.Getenv("USERPROFILE"); userProfile != "" {
+				documentsPath := userProfile + "\\Documents"
+				if documentsURI := storage.NewFileURI(documentsPath); documentsURI != nil {
+					if listableURI, ok := documentsURI.(fyne.ListableURI); ok {
+						folderDialog.SetLocation(listableURI)
+					}
+				}
+			}
+		}
+	})
+
+	// Show the dialog with stderr restored
 	folderDialog.Show()
 }
 
-func main() {
-	// Note: The "Getting favorite locations - Cause: uri is not listable" warning
-	// is a known Fyne issue on Windows where the file dialog tries to access
-	// system favorite locations that may not be accessible. This doesn't affect
-	// functionality and can be safely ignored.
+// CustomLogger implements a filtered logger that suppresses certain error messages
+type CustomLogger struct {
+	origLogger *log.Logger
+	filterText []string
+}
 
+// NewCustomLogger creates a logger that suppresses specific error messages
+func NewCustomLogger(filterMessages ...string) *CustomLogger {
+	return &CustomLogger{
+		origLogger: log.Default(),
+		filterText: filterMessages,
+	}
+}
+
+// Write implements io.Writer interface and filters out unwanted messages
+func (cl *CustomLogger) Write(p []byte) (n int, err error) {
+	msg := string(p)
+	
+	// Check if message contains any of the filter texts
+	for _, filter := range cl.filterText {
+		if strings.Contains(msg, filter) {
+			// Message should be filtered - don't log it
+			return len(p), nil
+		}
+	}
+	
+	// Message passed the filter, log it using the original logger
+	return os.Stderr.Write(p)
+}
+
+// setupErrorFiltering configures the logger to suppress certain Fyne errors
+func setupErrorFiltering() {
+	// Create a custom logger that filters out the URI listable error
+	customLogger := NewCustomLogger(
+		"Fyne error:  Getting favorite locations",
+		"Cause: uri is not listable",
+		"At: C:/Users/ggivl/go/pkg/mod/fyne.io/fyne/v2", // Filter the stack trace line
+		"dialog/file.go:", // Filter any file.go error location
+	)
+	
+	// Set it as the output for the default logger
+	log.SetOutput(customLogger)
+}
+
+func main() {
+	// Setup error filtering to handle Fyne errors gracefully
+	setupErrorFiltering()
+	
+	// KNOWN ISSUE: You may see a "Getting favorite locations - Cause: uri is not listable" error
+	// when clicking the folder selection button. This is a harmless Fyne framework issue
+	// on Windows systems. The error occurs because Fyne tries to access Windows favorite
+	// locations that may not be accessible. This does NOT affect functionality - the
+	// file dialog will still work correctly and you can select folders normally.
+	// 
+	// We've added a custom error filter to suppress these messages.
+	
 	// Create app with unique ID to fix "Preferences API requires a unique ID" error
 	a := app.NewWithID("com.gomusiclibrary.wizardapp")
-	w := a.NewWindow("Wizard Dialog Example")
+	w := a.NewWindow("Music Library Wizard")
 	w.Resize(fyne.NewSize(600, 400))
 
 	// Step 1 content
+	input := widget.NewEntry() // Create input widget
+	input.SetPlaceHolder("Selected folder will appear here")
 	step1Content := container.NewVBox(
 		widget.NewLabel("Welcome to the Wizard!"),
 		widget.NewLabel("Select the Music Library Folder to process"),
 		widget.NewButton("Select the Music Library Folder", func() {
 			fmt.Println("Enter Select the Music Library Folder to process")
-			showFolderPicker(w)
+			showFolderPicker(w, input)
 		}),
-		widget.NewEntry(), // Example input
+		input, // Add the input widget
 	)
 
 	// Step 2 content
