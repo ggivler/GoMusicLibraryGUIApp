@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	//iconv "github.com/djimenez/iconv-go"
 	_ "github.com/marcboeker/go-duckdb"  // Import the duckdb driver
 	"golang.org/x/text/encoding/charmap" // For common single-byte encodings like ISO-8859-1
 	"golang.org/x/text/transform"        // For general encoding transformations
