@@ -1,0 +1,8 @@
+alphabetizing letter,full path to folder,original filename,song title,voicing,composer or arranger,file type,file create date,library type
+G,.,GoMusicLibraryApp.go,go,UNKNOWN,UNKNOWN,UNKNOWN,2025-08-19,UNKNOWN
+D,.,db_import_export.go,import,UNKNOWN,go,UNKNOWN,2025-08-19,UNKNOWN
+M,my-gin-api,main.go,go,UNKNOWN,UNKNOWN,UNKNOWN,2025-08-19,UNKNOWN
+P,.,process_wizard_demo.go,wizard,UNKNOWN,go,UNKNOWN,2025-08-19,UNKNOWN
+W,.,walk.go,go,UNKNOWN,UNKNOWN,UNKNOWN,2025-08-20,UNKNOWN
+W,.,walk_test.go,test,UNKNOWN,UNKNOWN,UNKNOWN,2025-08-20,UNKNOWN
+Y,.,yaml_demo.go,demo,UNKNOWN,UNKNOWN,UNKNOWN,2025-08-13,UNKNOWN

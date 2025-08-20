@@ -5,6 +5,7 @@ go 1.24.3
 require (
 	fyne.io/fyne/v2 v2.6.2
 	github.com/marcboeker/go-duckdb v1.8.5
+	github.com/mattn/go-sqlite3 v1.14.32
 	golang.org/x/text v0.28.0
 	gopkg.in/yaml.v3 v3.0.1
 )
