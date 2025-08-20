@@ -7,7 +7,7 @@ Database:
     database_filename: musiclibrary.db
 GoDatabase:
     duckdb: true
-    go_database_filename: musiclibrary.duckdb
+    go_database_filename: musiclibrary.duck_db
 CSV:
     csv_filename: csv_output_full.csv
 FilePaths:
