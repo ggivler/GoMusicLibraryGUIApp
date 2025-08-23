@@ -1,15 +1,16 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"net/http"
+	"os"
+
+	"github.com/gin-gonic/gin"
 )
+
+// musicFiles is a slice of FileInfo structs to hold data
+var musicFiles []FileInfo
 
 // FileInfo represents the structure for JSON output
 type FileInfo struct {
@@ -24,11 +25,45 @@ type FileInfo struct {
 	LibraryType         string `json:"library type"`
 }
 
+// wrapper for the top-level JSON object in data.json
+type fileList struct {
+	Files []FileInfo `json:"files"`
+}
+
 func getMusicFileInfo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, musicFiles)
 }
 
+func read_write_json(inputFile, outputFile string) []FileInfo {
+	// Read the input JSON file which has a top-level object with a "files" array
+	data, err := os.ReadFile(inputFile)
+	if err != nil {
+		fmt.Printf("error reading %s: %v\n", inputFile, err)
+		return nil
+	}
+
+	var fl fileList
+	if err := json.Unmarshal(data, &fl); err != nil {
+		fmt.Printf("error parsing %s: %v\n", inputFile, err)
+		return nil
+	}
+
+	// Optionally write a pretty-printed flat array to outputFile for debugging/consumption
+	out, err := json.MarshalIndent(fl.Files, "", "  ")
+	if err != nil {
+		fmt.Printf("error marshaling output: %v\n", err)
+		return fl.Files
+	}
+	if err := os.WriteFile(outputFile, out, 0644); err != nil {
+		fmt.Printf("error writing %s: %v\n", outputFile, err)
+	}
+
+	return fl.Files
+}
+
 func main() {
+	musicFiles = read_write_json("data.json", "output.json")
+	fmt.Printf("found %d\n", len(musicFiles))
 	router := gin.Default()
 	router.GET("/musicfileinfo", getMusicFileInfo)
 	router.Run("localhost:8080")

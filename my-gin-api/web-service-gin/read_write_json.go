@@ -7,7 +7,10 @@ import (
 	"log"
 )
 
-func main() {
+input_json = "data.json"
+output_json = "output.json"
+
+func read_write_json(input_json string, output_json string) []byte {
 	// 1. Read the JSON file
 	filePath := "data.json" // Replace with your JSON file path
 	fileContent, err := ioutil.ReadFile(filePath)
@@ -87,4 +90,5 @@ func main() {
 	}
 
 	fmt.Println("JSON data written to output.json")
+	return jsonData
 }
