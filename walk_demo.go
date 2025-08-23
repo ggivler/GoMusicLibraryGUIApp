@@ -28,16 +28,16 @@ func NewDuckDBDatabase(dbName string) (*DuckDBDatabase, error) {
 	if dbName == "" {
 		dbName = "musiclibrary.duckdb"
 	}
-	
+
 	db := &DuckDBDatabase{
 		DbName: dbName,
 	}
-	
+
 	err := db.connect()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return db, nil
 }
 
@@ -73,12 +73,12 @@ func (db *DuckDBDatabase) CreateTable(tableName, columns string) error {
 func (db *DuckDBDatabase) InsertData(tableName string, data []interface{}) error {
 	placeholders := strings.Repeat("?,", len(data))
 	placeholders = strings.TrimSuffix(placeholders, ",")
-	
+
 	fmt.Printf("Data: %+v\n", data)
-	
+
 	query := fmt.Sprintf("INSERT INTO %s VALUES (%s)", tableName, placeholders)
 	fmt.Printf("Query: %s\n", query)
-	
+
 	_, err := db.Connection.Exec(query, data...)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
@@ -95,12 +95,12 @@ func (db *DuckDBDatabase) FetchAll(tableName, condition string) ([][]interface{}
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	columns, err := rows.Columns()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var result [][]interface{}
 	for rows.Next() {
 		values := make([]interface{}, len(columns))
@@ -108,14 +108,14 @@ func (db *DuckDBDatabase) FetchAll(tableName, condition string) ([][]interface{}
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
-		
+
 		if err := rows.Scan(valuePtrs...); err != nil {
 			return nil, err
 		}
-		
+
 		result = append(result, values)
 	}
-	
+
 	return result, nil
 }
 
@@ -144,7 +144,7 @@ func NewFileMethods(baseDir string) *FileMethods {
 
 func (fm *FileMethods) FindFilesRecursively(directoryPath string) ([]string, error) {
 	var fileLst []string
-	
+
 	err := filepath.WalkDir(directoryPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -154,24 +154,24 @@ func (fm *FileMethods) FindFilesRecursively(directoryPath string) ([]string, err
 		}
 		return nil
 	})
-	
+
 	return fileLst, err
 }
 
 func (fm *FileMethods) FindFilesInDirectory(directoryPath string) ([]string, error) {
 	var filesList []string
-	
+
 	entries, err := os.ReadDir(directoryPath)
 	if err != nil {
 		return nil, fmt.Errorf("error: Directory not found at '%s': %v", directoryPath, err)
 	}
-	
+
 	for _, entry := range entries {
 		fullPath := filepath.Join(directoryPath, entry.Name())
 		fmt.Printf("Full path: %s\n", fullPath)
 		filesList = append(filesList, fullPath)
 	}
-	
+
 	return filesList, nil
 }
 
@@ -181,26 +181,26 @@ func (fm *FileMethods) GetFullPathToFolder(directoryPath, fileName string) strin
 
 func (fm *FileMethods) SplitFilename(filenameToSplit, separator string) []string {
 	fmt.Printf("Filename to split: %s\n", filenameToSplit)
-	
+
 	// Use regex to split by space, underscore, or dot
 	re := regexp.MustCompile(`[ _.]`)
 	splitFileLst := re.Split(filenameToSplit, -1)
-	
+
 	fmt.Printf("Split file list: %+v\n", splitFileLst)
 	fmt.Printf("Length of splitFileLst is: %d\n", len(splitFileLst))
-	
+
 	return splitFileLst
 }
 
 func (fm *FileMethods) SplitSongTitle(songTitle string) string {
 	fmt.Printf("Song title: %s\n", songTitle)
-	
+
 	// Add space before capital letters (except at the beginning)
 	// Go doesn't support lookbehind, so we need to use a different approach
 	if len(songTitle) <= 1 {
 		return songTitle
 	}
-	
+
 	// Start with the first character, then iterate through the rest
 	result := string(songTitle[0])
 	for _, r := range songTitle[1:] {
@@ -210,7 +210,7 @@ func (fm *FileMethods) SplitSongTitle(songTitle string) string {
 		}
 		result += string(r)
 	}
-	
+
 	fmt.Printf("Split song title: %s\n", result)
 	return result
 }
@@ -219,7 +219,7 @@ func (fm *FileMethods) GetAlphabetizerLetterFromFilename(filename string) string
 	if len(filename) == 0 {
 		return ""
 	}
-	
+
 	alphaLetter := string(filename[0])
 	if unicode.IsDigit(rune(filename[0])) {
 		for _, r := range filename {
@@ -229,49 +229,49 @@ func (fm *FileMethods) GetAlphabetizerLetterFromFilename(filename string) string
 			}
 		}
 	}
-	
+
 	fmt.Printf("Alpha letter: %s\n", alphaLetter)
 	return strings.ToUpper(alphaLetter)
 }
 
 func (fm *FileMethods) GetExtensionFromFilename(composerArranger string) (string, string) {
 	fmt.Printf("Composer/arranger: %s\n", composerArranger)
-	
+
 	ext := filepath.Ext(composerArranger)
 	composer := strings.TrimSuffix(composerArranger, ext)
-	
+
 	fmt.Printf("Composer: %s\n", composer)
 	fmt.Printf("Extension: %s\n", ext)
-	
+
 	return composer, ext
 }
 
 func (fm *FileMethods) GetFileCreationDateFromFilename(dtFilename string) string {
 	formattedDt := ""
-	
+
 	info, err := os.Stat(dtFilename)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		fmt.Printf("Error: File not found at '%s'\n", dtFilename)
 		return formattedDt
 	}
-	
+
 	modTime := info.ModTime()
 	formattedDt = modTime.Format("2006-01-02")
-	
+
 	fmt.Printf("Formatted date: %s\n", formattedDt)
 	return formattedDt
 }
 
 func (fm *FileMethods) GetVoicingFromParsedFilename(listToParse interface{}) string {
 	fmt.Printf("List to parse: %+v\n", listToParse)
-	
+
 	voicing := ""
 	voicings := []string{
-		"SATB", "SSATB", "SSAATTBB", "SAB", "SA", "SSA", "SAA", 
+		"SATB", "SSATB", "SSAATTBB", "SAB", "SA", "SSA", "SAA",
 		"SSAA", "TB", "TTB", "TBB", "TTBB",
 	}
-	
+
 	switch v := listToParse.(type) {
 	case []string:
 		for _, entry := range voicings {
@@ -295,13 +295,13 @@ func (fm *FileMethods) GetVoicingFromParsedFilename(listToParse interface{}) str
 	default:
 		voicing = "Error: The variable listToParse must be a string or a slice"
 	}
-	
+
 	return voicing
 }
 
 func (fm *FileMethods) GetFileTypeFromFilePath(filepath string) string {
 	ext := strings.ToLower(filepath)
-	
+
 	switch {
 	case strings.Contains(ext, "pdf"):
 		return "PDF"
@@ -320,7 +320,7 @@ func (fm *FileMethods) GetFileTypeFromFilePath(filepath string) string {
 
 func (fm *FileMethods) GetLibraryTypeFromFilePath(filepath string) string {
 	libraryType := strings.ToLower(filepath)
-	
+
 	switch {
 	case strings.Contains(libraryType, "christmas"):
 		return "Christmas"
@@ -354,22 +354,22 @@ type MasterJSONFile struct {
 func (fm *FileMethods) WriteCSVOutputFile(inputJSON MasterJSONFile, outputPath, outputFilename string, fieldnames []string) error {
 	csvFilename := filepath.Join(outputPath, outputFilename)
 	fmt.Printf("CSV filename: %s\n", csvFilename)
-	
+
 	file, err := os.Create(csvFilename)
 	if err != nil {
 		fmt.Printf("I/O error: %v\n", err)
 		return err
 	}
 	defer file.Close()
-	
+
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
-	
+
 	// Write header
 	if err := writer.Write(fieldnames); err != nil {
 		return err
 	}
-	
+
 	// Write data rows
 	fmt.Printf("Input JSON files: %+v\n", inputJSON.Files)
 	for _, fileInfo := range inputJSON.Files {
@@ -388,7 +388,7 @@ func (fm *FileMethods) WriteCSVOutputFile(inputJSON MasterJSONFile, outputPath, 
 			return err
 		}
 	}
-	
+
 	fmt.Printf("Wrote CSV output to %s\n", csvFilename)
 	return nil
 }
@@ -400,32 +400,32 @@ func (fm *FileMethods) ImportCSVFileIntoDB(csvFilename, databaseFilename, tableN
 		return err
 	}
 	defer fm.db.Close()
-	
+
 	err = fm.db.CreateTable("music_library", fm.DbColumnNames)
 	if err != nil {
 		return err
 	}
-	
+
 	file, err := os.Open(csvFilename)
 	if err != nil {
 		fmt.Printf("Error: The file '%s' was not found: %v\n", csvFilename, err)
 		return err
 	}
 	defer file.Close()
-	
+
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()
 	if err != nil {
 		return err
 	}
-	
+
 	if len(records) > 0 {
 		header := records[0]
 		fmt.Printf("Header: %+v\n", header)
-		
+
 		for i, row := range records[1:] {
 			fmt.Printf("Row: %+v\n", row)
-			
+
 			// Insert ID at the beginning
 			data := make([]interface{}, len(row)+1)
 			data[0] = i + 1
@@ -433,14 +433,14 @@ func (fm *FileMethods) ImportCSVFileIntoDB(csvFilename, databaseFilename, tableN
 				data[j+1] = v
 			}
 			fmt.Printf("Data with ID: %+v\n", data)
-			
+
 			err = fm.db.InsertData(tableName, data)
 			if err != nil {
 				fmt.Printf("Database Error has occurred: %v\n", err)
 				continue
 			}
 		}
-		
+
 		allRows, err := fm.db.FetchAll("music_library", "")
 		if err != nil {
 			return err
@@ -448,7 +448,7 @@ func (fm *FileMethods) ImportCSVFileIntoDB(csvFilename, databaseFilename, tableN
 		fmt.Printf("All rows: %+v\n", allRows)
 		fmt.Printf("Number of rows: %d\n", len(allRows))
 	}
-	
+
 	return nil
 }
 
@@ -459,12 +459,12 @@ func main() {
 	outputCSV := flag.String("o", "csv_output_full.csv", "CSV output file")
 	dbname := flag.String("b", "musiclibrary.duckdb", "Database filename")
 	flag.Parse()
-	
+
 	fileExt := *extension
-	
+
 	keywords := []string{
 		"alphabetizing letter",
-		"full path to folder", 
+		"full path to folder",
 		"original filename",
 		"song title",
 		"voicing",
@@ -473,19 +473,19 @@ func main() {
 		"file create date",
 		"library type",
 	}
-	
+
 	fmt.Printf("Directory path: %s\n", *dirpath)
-	
+
 	fileMethods := NewFileMethods(*dirpath)
-	
+
 	// Find files recursively
 	fileLst, err := fileMethods.FindFilesRecursively(*dirpath)
 	if err != nil {
 		log.Fatalf("Error finding files: %v", err)
 	}
-	
+
 	fmt.Printf("File list: %+v\n", fileLst)
-	
+
 	var pdfFileLst []string
 	for _, filename := range fileLst {
 		if strings.HasSuffix(filename, fileExt) {
@@ -493,22 +493,21 @@ func main() {
 			pdfFileLst = append(pdfFileLst, filename)
 		}
 	}
-	
+
 	var jsonFileLst []FileInfo
 	for _, pdfFilepath := range pdfFileLst {
 		var jsonFileInfo FileInfo
 		pdfFilename := filepath.Base(pdfFilepath)
 		splitFilename := fileMethods.SplitFilename(pdfFilename, "_")
-		
+
 		fmt.Printf("Split filename: %+v\n", splitFilename)
-		
+
 		// Initialize default values
 		dirPath := "UNKNOWN"
 		rawTitle := "UNKNOWN"
 		rawVoicing := "UNKNOWN"
 		rawComposerArranger := "UNKNOWN"
-		rawExt := "UNKNOWN"
-		
+
 		k := len(splitFilename)
 		if k > 0 {
 			dirPath = splitFilename[0]
@@ -520,16 +519,25 @@ func main() {
 			rawVoicing = splitFilename[2]
 		}
 		if k > 3 {
-			rawComposerArranger = splitFilename[3]
+			// Extract composer/arranger, but remove file extension if it's the last element
+			composerWithExt := splitFilename[3]
+			if k > 4 {
+				// If there are more elements, this is not the last one, so it shouldn't have extension
+				rawComposerArranger = composerWithExt
+			} else {
+				// This might be the last element, so remove extension
+				composer, _ := fileMethods.GetExtensionFromFilename(composerWithExt)
+				if composer != "" {
+					rawComposerArranger = composer
+				} else {
+					rawComposerArranger = composerWithExt
+				}
+			}
 		}
-		if k > 0 {
-			rawExt = splitFilename[k-1]
-		}
-		
+
 		_ = dirPath
 		_ = rawVoicing
-		_ = rawExt
-		
+
 		jsonFileInfo.AlphabetizingLetter = fileMethods.GetAlphabetizerLetterFromFilename(filepath.Base(pdfFilepath))
 		jsonFileInfo.FullPathToFolder = filepath.Dir(pdfFilepath)
 		jsonFileInfo.OriginalFilename = filepath.Base(pdfFilepath)
@@ -538,33 +546,34 @@ func main() {
 		jsonFileInfo.Voicing = fileMethods.GetVoicingFromParsedFilename(splitFilename)
 		jsonFileInfo.ComposerOrArranger = rawComposerArranger
 		jsonFileInfo.FileType = fileMethods.GetFileTypeFromFilePath(pdfFilepath)
-		jsonFileInfo.LibraryType = fileMethods.GetLibraryTypeFromFilePath(pdfFilepath)
-		
+		// jsonFileInfo.LibraryType = fileMethods.GetLibraryTypeFromFilePath(pdfFilepath)
+		jsonFileInfo.LibraryType = fmt.Sprintf("%s,", fileMethods.GetLibraryTypeFromFilePath(pdfFilepath))
+
 		fmt.Printf("PDF filepath: %s\n", pdfFilepath)
 		fmt.Printf("JSON file info: %+v\n", jsonFileInfo)
-		
+
 		jsonFileLst = append(jsonFileLst, jsonFileInfo)
 	}
-	
+
 	masterJSONFile := MasterJSONFile{
 		Files: jsonFileLst,
 	}
-	
+
 	fmt.Printf("Number of PDF files: %d\n", len(pdfFileLst))
 	fmt.Printf("Master JSON file: %+v\n", masterJSONFile)
-	
+
 	// Write CSV output
 	err = fileMethods.WriteCSVOutputFile(masterJSONFile, ".", *outputCSV, keywords)
 	if err != nil {
 		log.Printf("Error writing CSV: %v", err)
 	}
-	
+
 	// Import CSV to database
 	err = fileMethods.ImportCSVFileIntoDB(*outputCSV, *dbname, "music_library")
 	if err != nil {
 		log.Printf("Error importing to database: %v", err)
 	}
-	
+
 	// Write JSON output
 	jsonOutPath := "output_file_full.json"
 	jsonData, err := json.MarshalIndent(masterJSONFile, "", "    ")
@@ -572,12 +581,12 @@ func main() {
 		log.Printf("Error marshaling JSON: %v", err)
 		return
 	}
-	
+
 	err = os.WriteFile(jsonOutPath, jsonData, 0644)
 	if err != nil {
 		log.Printf("Error writing JSON file: %v", err)
 		return
 	}
-	
+
 	fmt.Printf("JSON output written to: %s\n", jsonOutPath)
 }
