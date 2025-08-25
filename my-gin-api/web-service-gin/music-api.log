@@ -1,0 +1,43 @@
+2025/08/24 20:39:40.136682 main.go:96: Application started.
+2025/08/24 20:39:40.137216 main.go:97: Processing data for user: John Doe
+2025/08/24 20:39:40.137216 main.go:99: executable directory: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp\my-gin-api\web-service-gin
+2025/08/24 20:42:13.338114 main.go:96: Application started.
+2025/08/24 20:42:13.339365 main.go:97: Processing data for user: John Doe
+2025/08/24 20:42:13.339365 main.go:99: executable directory: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp\my-gin-api\web-service-gin
+2025/08/24 20:46:34.547267 main.go:96: Application started.
+2025/08/24 20:46:34.548423 main.go:97: Processing data for user: John Doe
+2025/08/24 20:46:34.548423 main.go:99: executable directory: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp\my-gin-api\web-service-gin
+2025/08/24 21:02:24.461408 logger.go:49: found 473 music files
+2025/08/24 21:02:24.461962 logger.go:42: Application started.
+2025/08/24 21:02:24.461962 logger.go:49: Processing data for user: John Doe
+2025/08/24 21:02:24.461962 logger.go:49: executable directory: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp\my-gin-api\web-service-gin
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /musicfileinfo            --> main.getMusicFileInfo (3 handlers)
+2025/08/24 21:02:24.461962 logger.go:42: Starting server on localhost:8080
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on localhost:8080
+2025/08/24 21:07:52.217964 logger.go:49: found 473 music files
+2025/08/24 21:07:52.218621 logger.go:42: Application started.
+2025/08/24 21:07:52.218621 logger.go:49: Processing data for user: John Doe
+2025/08/24 21:07:52.218621 logger.go:49: executable directory: C:\Users\ggivl\Documents\GoDevelopment\GoMusicLibraryGUIApp\my-gin-api\web-service-gin
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /musicfileinfo            --> main.getMusicFileInfo (3 handlers)
+2025/08/24 21:07:52.218621 logger.go:42: Starting server on localhost:8080
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on localhost:8080
+2025/08/24 21:09:01.603992 logger.go:42: getMusicFileInfo endpoint called
+[GIN] 2025/08/24 - 21:09:01 | 200 |      7.7067ms |       127.0.0.1 | GET      "/musicfileinfo"
+2025/08/24 21:10:00.050777 logger.go:42: getMusicFileInfo endpoint called
+[GIN] 2025/08/24 - 21:10:00 | 200 |      2.2074ms |       127.0.0.1 | GET      "/musicfileinfo"

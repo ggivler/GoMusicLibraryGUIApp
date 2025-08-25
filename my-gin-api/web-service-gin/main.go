@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
-	"github.com/alexflint/go-arg"
+	"example/web-service-gin/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +33,7 @@ type fileList struct {
 }
 
 func getMusicFileInfo(c *gin.Context) {
+	logger.Info("getMusicFileInfo endpoint called")
 	c.IndentedJSON(http.StatusOK, musicFiles)
 }
 
@@ -39,33 +41,64 @@ func read_write_json(inputFile, outputFile string) []FileInfo {
 	// Read the input JSON file which has a top-level object with a "files" array
 	data, err := os.ReadFile(inputFile)
 	if err != nil {
-		fmt.Printf("error reading %s: %v\n", inputFile, err)
+		logger.Errorf("error reading %s: %v", inputFile, err)
 		return nil
 	}
 
 	var fl fileList
 	if err := json.Unmarshal(data, &fl); err != nil {
-		fmt.Printf("error parsing %s: %v\n", inputFile, err)
+		logger.Errorf("error parsing %s: %v", inputFile, err)
 		return nil
 	}
 
 	// Optionally write a pretty-printed flat array to outputFile for debugging/consumption
 	out, err := json.MarshalIndent(fl.Files, "", "  ")
 	if err != nil {
-		fmt.Printf("error marshaling output: %v\n", err)
+		logger.Errorf("error marshaling output: %v", err)
 		return fl.Files
 	}
 	if err := os.WriteFile(outputFile, out, 0644); err != nil {
-		fmt.Printf("error writing %s: %v\n", outputFile, err)
+		logger.Errorf("error writing %s: %v", outputFile, err)
 	}
 
 	return fl.Files
 }
+func getWorkingDirectory() string {
+	// Get the path of the current executable
+	exePath, err := os.Executable()
+	if err != nil {
+		logger.Errorf("error getting executable path: %v", err)
+		return ""
+	}
+
+	// Get the directory containing the executable
+	dir := filepath.Dir(exePath)
+	return dir
+}
 
 func main() {
+	// Initialize the global logger
+	err := logger.Init("music-api.log")
+	if err != nil {
+		fmt.Printf("Failed to initialize logger: %v\n", err)
+		os.Exit(1)
+	}
+	defer logger.Close() // Ensure the log file is closed when the main function exits
+
+	// Set Gin's output to use the same log file
+	gin.DefaultWriter = logger.GetWriter()
+
 	musicFiles = read_write_json("data.json", "output.json")
-	fmt.Printf("found %d\n", len(musicFiles))
+	logger.Infof("found %d music files", len(musicFiles))
+
+	// Write log messages using the global logger
+	logger.Info("Application started.")
+	logger.Infof("Processing data for user: %s", "John Doe")
+	workingdir := getWorkingDirectory()
+	logger.Infof("executable directory: %s", workingdir)
+
 	router := gin.Default()
 	router.GET("/musicfileinfo", getMusicFileInfo)
+	logger.Info("Starting server on localhost:8080")
 	router.Run("localhost:8080")
 }
